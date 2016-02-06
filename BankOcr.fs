@@ -16,10 +16,10 @@ DECIMAL
 CREATE ACCOUNT ACCOUNT-SIZE ALLOT 
 ACCOUNT ACCOUNT-SIZE ERASE
 
-: BAR?   ( c -- f|t ) 
+: BAR?   ( c -- f|t  leaves True is the char is a bar, False is a space ) 
     32 <> 1 AND ;
 
-: 2*OR   ( c,b -- c*2 or b ) 
+: 2*OR   ( byte,bit -- byte'  shift-left the byte and store a new bit into the right position ) 
     SWAP 2* OR ;
 
 : OCR-BIT-OFFSET ( n,p -- p ) 
@@ -51,6 +51,7 @@ ACCOUNT ACCOUNT-SIZE ERASE
 
 : PRINT-ACCOUNT ( -- )
     ACCOUNT 9 TYPE 
-    ILLEGAL? IF ."  ILL" THEN ;
+    ILLEGAL? IF ."  ILL" 
+    ELSE ACCOUNT-SUMCHECK? 0= IF ."  ERR" THEN THEN ;
 
 
