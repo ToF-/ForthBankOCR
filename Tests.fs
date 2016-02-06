@@ -2,11 +2,18 @@
 
 S" BankOcr.fs" REQUIRED
 
-: CHECK-ACCOUNT ( -- t|f )
+: TEST-SAMPLE-012345678
+\  0         1         2         3         4         5         6         7         8
+\  01234567890123456789012345678901234567890123456789012345678901234567890123456789012
+S"  _     _  _     _  _  _  _ | |  | _| _||_||_ |_   ||_||_|  ||_  _|  | _||_|  ||_|"
+OCR-BITS SWAP CMOVE ;
+
+: CHECK-SAMPLE-012345678 ( -- t|f )
     TRUE
     9 0 DO ACCOUNT I + C@ I <> IF DROP FALSE THEN LOOP ;
 
 : CHECKS
+    TEST-SAMPLE-012345678
     ASSERT( 32  BAR? 0 = ) 
     ASSERT( 95  BAR? 1 = ) 
     ASSERT( 124 BAR? 1 = )
@@ -42,8 +49,10 @@ S" BankOcr.fs" REQUIRED
     OCR-BITS 1+ 95 SWAP C!
     ASSERT( ACCOUNT ACCOUNT-SIZE ERASE 
             OCR>ACCOUNT
-            CHECK-ACCOUNT 
-            ACCOUNT 9 DUMP )
+            CHECK-SAMPLE-012345678 )
+    PRINT-ACCOUNT
+
+
             
 ; 
 CR CHECKS .S CR BYE
