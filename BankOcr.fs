@@ -76,7 +76,7 @@ ACCOUNT ACCOUNT-SIZE ERASE
 
 : PATTERN>DIGIT  ( byte -- c|?  search the digits table for a digit or ? if not found) 
     NOT-FOUND   10 0 DO
-        OVER I DIGIT>PATTERN = IF  DROP I DIGIT>CHAR THEN  
+        OVER I DIGIT>PATTERN = IF  DROP I DIGIT>CHAR LEAVE THEN  
     LOOP NIP ; 
 
 : OCR>ACCOUNT ( --   converts OCR data to account number )
@@ -97,7 +97,7 @@ ACCOUNT ACCOUNT-SIZE ERASE
     LOOP   11 MOD ;
 
 : ILLEGIBLE? ( -- f|t    checks the account for illegible digit )
-    FALSE 9 0 DO ACCOUNT I + C@ NOT-FOUND = IF DROP TRUE THEN LOOP ;
+    FALSE 9 0 DO ACCOUNT I + C@ NOT-FOUND = IF DROP TRUE LEAVE THEN LOOP ;
 
 : PRINT-ACCOUNT \ prints the account with suffix if illegal or error
     ACCOUNT 9 TYPE 
