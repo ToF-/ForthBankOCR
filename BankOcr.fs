@@ -1,8 +1,11 @@
-
+    32 CONSTANT SP
+CHAR _ CONSTANT HBAR
+CHAR | CONSTANT VBAR
      3 CONSTANT OCR-WIDTH 
      3 CONSTANT OCR-HEIGHT
      9 CONSTANT ACCOUNT-SIZE
 CHAR ? CONSTANT NOT-FOUND
+OCR-WIDTH ACCOUNT-SIZE * CONSTANT OCR-LINE-SIZE
 
 CREATE OCR-BITS OCR-WIDTH OCR-HEIGHT ACCOUNT-SIZE * * ALLOT 
 
@@ -38,13 +41,21 @@ ACCOUNT ACCOUNT-SIZE ERASE
     SWAP 2* OR ;
 
 : OCR-BIT-OFFSET ( n,p -- [p/3]*27+[p%3]+n*3  ) 
-    OCR-HEIGHT /MOD OCR-WIDTH ACCOUNT-SIZE * * + 
+    OCR-HEIGHT /MOD OCR-LINE-SIZE * + 
     SWAP OCR-WIDTH * + ;
 
-: PATTERN ( n -- byte  converts one OCR digit into its binary pattern ) 
+: OCR>PATTERN ( n -- byte  converts one OCR digit into its binary pattern ) 
     0  9 0 DO  
         OVER I OCR-BIT-OFFSET OCR-BITS + C@ BAR? 2*OR 
     LOOP NIP ;
+
+: PATTERN>OCR ( byte,n -- converts a binary pattern into the n OCR digit)
+    9 0 DO                                           ( byte,n -- ) 
+    OVER 1 AND ROT 2/ -ROT                           ( byte',n,b )
+    IF I 2 + 3 MOD IF VBAR ELSE HBAR THEN ELSE SP THEN   ( byte',n,c )
+    SWAP DUP 8 I - OCR-BIT-OFFSET OCR-BITS +         ( byte',c,n,p )
+    ROT SWAP C! LOOP                                 ( byte',n)
+    2DROP ; 
 
 : DIGIT-PATTERN ( i -- n  binary pattern corresponding to a digit )
     DIGITS + C@ ;
@@ -60,11 +71,16 @@ ACCOUNT ACCOUNT-SIZE ERASE
         OVER I DIGIT-PATTERN = IF  DROP I DIGIT>CHAR THEN  
     LOOP NIP ; 
 
-: OCR>ACCOUNT ( --   converts OCR data to account numbert )
+: OCR>ACCOUNT ( --   converts OCR data to account number )
     9 0 DO   
-        I PATTERN DIGIT 
+        I OCR>PATTERN DIGIT 
         ACCOUNT I + C! 
     LOOP ;
+
+: ACCOUNT>OCR ( -- converts account number to OCR data )
+    9 0 DO
+        ACCOUNT I + C@ CHAR>DIGIT DIGIT-PATTERN
+        I PATTERN>OCR LOOP ;
 
 : SUMCHECK-ERROR? ( -- f|t  checks that [d0*9+d1*8+..+d8] is a multiple of 11 )
     0   9 0 DO 
@@ -80,4 +96,9 @@ ACCOUNT ACCOUNT-SIZE ERASE
     ILLEGIBLE?      IF ."  ILL" ELSE 
     SUMCHECK-ERROR? IF ."  ERR" THEN THEN ;
 
+: PRINT-OCR \ prints the OCR 3 line text
+    OCR-BITS 0 0 OCR-BIT-OFFSET + OCR-LINE-SIZE TYPE CR
+    OCR-BITS 0 3 OCR-BIT-OFFSET + OCR-LINE-SIZE TYPE CR
+    OCR-BITS 0 6 OCR-BIT-OFFSET + OCR-LINE-SIZE TYPE CR ;
+    
 
