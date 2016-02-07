@@ -1,3 +1,4 @@
+\ BankOCR.fs  Solving the Bank OCR kata
     32 CONSTANT SP
 CHAR _ CONSTANT HBAR
 CHAR | CONSTANT VBAR
@@ -7,7 +8,7 @@ CHAR | CONSTANT VBAR
 CHAR ? CONSTANT NOT-FOUND
 OCR-WIDTH ACCOUNT-SIZE * CONSTANT OCR-LINE-SIZE
 
-CREATE OCR-BITS OCR-WIDTH OCR-HEIGHT ACCOUNT-SIZE * * ALLOT 
+CREATE OCR-BUFFER OCR-WIDTH OCR-HEIGHT ACCOUNT-SIZE * * ALLOT 
 
 \ table of binary patterns for digits 0..9
 \ each OCR digit is coded on 9 chars in [space,|,_]
@@ -37,27 +38,34 @@ ACCOUNT ACCOUNT-SIZE ERASE
 : BAR?   ( c -- f|t  leaves True is the char is a bar, False is a space ) 
     32 <> 1 AND ;
 
-: 2*OR   ( byte,bit -- byte  shift-left the byte and store a new bit into the right position ) 
+: BIT!   ( byte,bit -- byte'  shift-left the byte and store a new bit into the right position ) 
     SWAP 2* OR ;
 
-: OCR-BIT-OFFSET ( n,p -- [p/3]*27+[p%3]+n*3  ) 
+: BIT@   ( byte -- byte',bit extract the lower bit and shift-right the byte )
+    DUP 1 AND SWAP 2/ SWAP ;
+
+: OCR-OFFSET ( n,p -- [p/3]*27+[p%3]+n*3  ) 
     OCR-HEIGHT /MOD OCR-LINE-SIZE * + 
     SWAP OCR-WIDTH * + ;
 
 : OCR>PATTERN ( n -- byte  converts one OCR digit into its binary pattern ) 
     0  9 0 DO  
-        OVER I OCR-BIT-OFFSET OCR-BITS + C@ BAR? 2*OR 
+        OVER I OCR-OFFSET OCR-BUFFER + C@ BAR? BIT! 
     LOOP NIP ;
 
-: PATTERN>OCR ( byte,n -- converts a binary pattern into the n OCR digit)
-    9 0 DO                                           ( byte,n -- ) 
-    OVER 1 AND ROT 2/ -ROT                           ( byte',n,b )
-    IF I 2 + 3 MOD IF VBAR ELSE HBAR THEN ELSE SP THEN   ( byte',n,c )
-    SWAP DUP 8 I - OCR-BIT-OFFSET OCR-BITS +         ( byte',c,n,p )
-    ROT SWAP C! LOOP                                 ( byte',n)
-    2DROP ; 
+: BIT>OCR-CHAR ( b,n -- c  converts bit #n into OCR char SP,| or _ )
+    2 + 3 MOD IF VBAR ELSE HBAR THEN
+    SWAP 0= IF DROP SP THEN ;
 
-: DIGIT-PATTERN ( i -- n  binary pattern corresponding to a digit )
+: PATTERN>OCR ( byte,n -- converts a binary pattern into the n OCR digit)
+    9 0 DO
+        SWAP BIT@
+        I BIT>OCR-CHAR
+        ROT DUP 8 I - OCR-OFFSET OCR-BUFFER +
+        ROT SWAP C! 
+    LOOP 2DROP ; 
+
+: DIGIT>PATTERN ( i -- n  binary pattern corresponding to a digit )
     DIGITS + C@ ;
 
 : DIGIT>CHAR ( n -- c  convert digit [0..9] to O..9, and 15 to ? )
@@ -66,20 +74,20 @@ ACCOUNT ACCOUNT-SIZE ERASE
 : CHAR>DIGIT ( n -- c  convert char [0..9] to 0..9 and ? to 15 )
     [ 2 BASE ! ] 001111 AND [ DECIMAL ] ;
 
-: DIGIT  ( byte -- c|?  search the digits table for a digit or ? if not found) 
+: PATTERN>DIGIT  ( byte -- c|?  search the digits table for a digit or ? if not found) 
     NOT-FOUND   10 0 DO
-        OVER I DIGIT-PATTERN = IF  DROP I DIGIT>CHAR THEN  
+        OVER I DIGIT>PATTERN = IF  DROP I DIGIT>CHAR THEN  
     LOOP NIP ; 
 
 : OCR>ACCOUNT ( --   converts OCR data to account number )
     9 0 DO   
-        I OCR>PATTERN DIGIT 
+        I OCR>PATTERN PATTERN>DIGIT 
         ACCOUNT I + C! 
     LOOP ;
 
 : ACCOUNT>OCR ( -- converts account number to OCR data )
     9 0 DO
-        ACCOUNT I + C@ CHAR>DIGIT DIGIT-PATTERN
+        ACCOUNT I + C@ CHAR>DIGIT DIGIT>PATTERN
         I PATTERN>OCR LOOP ;
 
 : SUMCHECK-ERROR? ( -- f|t  checks that [d0*9+d1*8+..+d8] is a multiple of 11 )
@@ -97,8 +105,8 @@ ACCOUNT ACCOUNT-SIZE ERASE
     SUMCHECK-ERROR? IF ."  ERR" THEN THEN ;
 
 : PRINT-OCR \ prints the OCR 3 line text
-    OCR-BITS 0 0 OCR-BIT-OFFSET + OCR-LINE-SIZE TYPE CR
-    OCR-BITS 0 3 OCR-BIT-OFFSET + OCR-LINE-SIZE TYPE CR
-    OCR-BITS 0 6 OCR-BIT-OFFSET + OCR-LINE-SIZE TYPE CR ;
+    OCR-BUFFER 0 0 OCR-OFFSET + OCR-LINE-SIZE TYPE CR
+    OCR-BUFFER 0 3 OCR-OFFSET + OCR-LINE-SIZE TYPE CR
+    OCR-BUFFER 0 6 OCR-OFFSET + OCR-LINE-SIZE TYPE CR ;
     
 
