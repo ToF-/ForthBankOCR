@@ -1,16 +1,31 @@
 
-3 CONSTANT OCR-WIDTH 
-3 CONSTANT OCR-HEIGHT
-9 CONSTANT ACCOUNT-SIZE
+     3 CONSTANT OCR-WIDTH 
+     3 CONSTANT OCR-HEIGHT
+     9 CONSTANT ACCOUNT-SIZE
 CHAR ? CONSTANT NOT-FOUND
-OCR-WIDTH ACCOUNT-SIZE * CONSTANT LINE-SIZE
 
-CREATE OCR-BITS 81 ALLOT 
+CREATE OCR-BITS OCR-WIDTH OCR-HEIGHT ACCOUNT-SIZE * * ALLOT 
 
+\ table of binary patterns for digits 0..9
+\ each OCR digit is coded on 9 chars in [space,|,_]
+\  _     _  _     _  _  _  _  _ 
+\ | |  | _| _||_||_ |_   ||_||_|
+\ |_|  ||_  _|  | _||_|  ||_| _|
+\
+\ a bar in the middle column is always horizontal
+\ a bar in column 0 or 2 is always vertical 
+\ therefore each char can be coded on 1 bit.
+\ the char in column 0 row 0 is always space
+\ therefore each OCR digit can be coded on 8 bits 
+
+\ bits#   0   1   2   3   4   5   6   7   8   9  
+\  76    10  00  10  01  00  10  10  10  10  10
+\ 543   101 001 001 011 111 110 110 001 111 111
+\ 210   111 001 111 011 001 011 111 001 111 011
 
 2 BASE !
-CREATE DIGITS 010101111 C, 00001001 C, 010011110 C, 10011011 C, 00111001 C,
-              010110011 C, 10110111 C, 010001001 C, 10111111 C, 10111011 C, 
+CREATE DIGITS 10101111 C, 00001001 C, 10011110 C, 10011011 C, 00111001 C,
+              10110011 C, 10110111 C, 10001001 C, 10111111 C, 10111011 C, 
 DECIMAL
 
 CREATE ACCOUNT ACCOUNT-SIZE ALLOT 
@@ -19,11 +34,11 @@ ACCOUNT ACCOUNT-SIZE ERASE
 : BAR?   ( c -- f|t  leaves True is the char is a bar, False is a space ) 
     32 <> 1 AND ;
 
-: 2*OR   ( byte,bit -- byte'  shift-left the byte and store a new bit into the right position ) 
+: 2*OR   ( byte,bit -- byte  shift-left the byte and store a new bit into the right position ) 
     SWAP 2* OR ;
 
 : OCR-BIT-OFFSET ( n,p -- [p/3]*27+[p%3]+n*3  ) 
-    OCR-HEIGHT /MOD LINE-SIZE * + 
+    OCR-HEIGHT /MOD OCR-WIDTH ACCOUNT-SIZE * * + 
     SWAP OCR-WIDTH * + ;
 
 : PATTERN ( n -- byte  converts one OCR digit into its binary pattern ) 
@@ -31,13 +46,13 @@ ACCOUNT ACCOUNT-SIZE ERASE
         OVER I OCR-BIT-OFFSET OCR-BITS + C@ BAR? 2*OR 
     LOOP NIP ;
 
-: DIGIT-PATTERN ( i -- n )
+: DIGIT-PATTERN ( i -- n  binary pattern corresponding to a digit )
     DIGITS + C@ ;
 
-: DIGIT>CHAR ( n -- c  convert digit [0..9] to 'O'..'9', and 15 to '?' )
+: DIGIT>CHAR ( n -- c  convert digit [0..9] to O..9, and 15 to ? )
     [ 2 BASE ! ] 110000 OR [ DECIMAL ] ;
 
-: CHAR>DIGIT ( n -- c  convert char ['0'..'9'] to 0..9 and '?' to 15 )
+: CHAR>DIGIT ( n -- c  convert char [0..9] to 0..9 and ? to 15 )
     [ 2 BASE ! ] 001111 AND [ DECIMAL ] ;
 
 : DIGIT  ( byte -- c|?  search the digits table for a digit or ? if not found) 
