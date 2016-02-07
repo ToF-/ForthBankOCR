@@ -22,36 +22,47 @@ ACCOUNT ACCOUNT-SIZE ERASE
 : 2*OR   ( byte,bit -- byte'  shift-left the byte and store a new bit into the right position ) 
     SWAP 2* OR ;
 
-: OCR-BIT-OFFSET ( n,p -- p ) 
+: OCR-BIT-OFFSET ( n,p -- [p/3]*27+[p%3]+n*3  ) 
     OCR-HEIGHT /MOD LINE-SIZE * + 
     SWAP OCR-WIDTH * + ;
 
-: PATTERN ( n -- byte) 
+: PATTERN ( n -- byte  converts one OCR digit into its binary pattern ) 
     0  9 0 DO  
         OVER I OCR-BIT-OFFSET OCR-BITS + C@ BAR? 2*OR 
     LOOP NIP ;
 
-: @DIGIT ( i -- n )
+: DIGIT-PATTERN ( i -- n )
     DIGITS + C@ ;
 
-: DIGIT  ( byte -- c|?) 
-    NOT-FOUND  10 0 DO
-        OVER I @DIGIT = IF  DROP I  THEN  
-    LOOP NIP 48 OR ; 
+: DIGIT>CHAR ( n -- c  convert digit [0..9] to 'O'..'9', and 15 to '?' )
+    [ 2 BASE ! ] 110000 OR [ DECIMAL ] ;
 
-: OCR>ACCOUNT ( -- ) 9 0 DO I PATTERN DIGIT ACCOUNT I + C! LOOP ;
+: CHAR>DIGIT ( n -- c  convert char ['0'..'9'] to 0..9 and '?' to 15 )
+    [ 2 BASE ! ] 001111 AND [ DECIMAL ] ;
 
-: ACCOUNT-SUMCHECK? ( -- f|t )
-    0
-    9 0 DO ACCOUNT I + C@ 15 AND 9 I - * + LOOP
-    11 MOD 0= ;
+: DIGIT  ( byte -- c|?  search the digits table for a digit or ? if not found) 
+    NOT-FOUND   10 0 DO
+        OVER I DIGIT-PATTERN = IF  DROP I DIGIT>CHAR THEN  
+    LOOP NIP ; 
 
-: ILLEGAL? ( -- f|t )
+: OCR>ACCOUNT ( --   converts OCR data to account numbert )
+    9 0 DO   
+        I PATTERN DIGIT 
+        ACCOUNT I + C! 
+    LOOP ;
+
+: SUMCHECK-ERROR? ( -- f|t  checks that [d0*9+d1*8+..+d8] is a multiple of 11 )
+    0   9 0 DO 
+        ACCOUNT I + C@ 
+        CHAR>DIGIT 9 I - * + 
+    LOOP   11 MOD ;
+
+: ILLEGIBLE? ( -- f|t    checks the account for illegible digit )
     FALSE 9 0 DO ACCOUNT I + C@ NOT-FOUND = IF DROP TRUE THEN LOOP ;
 
-: PRINT-ACCOUNT ( -- )
+: PRINT-ACCOUNT \ prints the account with suffix if illegal or error
     ACCOUNT 9 TYPE 
-    ILLEGAL? IF ."  ILL" 
-    ELSE ACCOUNT-SUMCHECK? 0= IF ."  ERR" THEN THEN ;
+    ILLEGIBLE?      IF ."  ILL" ELSE 
+    SUMCHECK-ERROR? IF ."  ERR" THEN THEN ;
 
 

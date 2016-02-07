@@ -54,13 +54,13 @@ OCR-BITS SWAP CMOVE ;
     \ sumchecks account 457508000
     S" 457508000" ACCOUNT SWAP CMOVE 
     PRINT-ACCOUNT CR        
-    ASSERT( ACCOUNT-SUMCHECK? )
+    ASSERT( SUMCHECK-ERROR? 0= )
     TEST-SAMPLE-012345678
     \ altering an ocr digit
     OCR-BITS 1+ 32 SWAP C!
     OCR>ACCOUNT
     PRINT-ACCOUNT CR
-    ASSERT( ILLEGAL? )
+    ASSERT( ILLEGIBLE? )
     \ fixing the ocr digit back
     OCR-BITS 1+ 95 SWAP C!
 ; 
