@@ -38,19 +38,19 @@ ACCOUNT ACCOUNT-SIZE ERASE
 : BAR?   ( c -- f|t  leaves True is the char is a bar, False is a space ) 
     32 <> 1 AND ;
 
-: BIT!   ( byte,bit -- byte'  shift-left the byte and store a new bit into the right position ) 
+: BIT<<   ( byte,bit -- byte'  shift-left the byte and store a new bit into the right position ) 
     SWAP 2* OR ;
 
-: BIT@   ( byte -- byte',bit extract the lower bit and shift-right the byte )
-    DUP 1 AND SWAP 2/ SWAP ;
+: BIT>>   ( byte -- byte',bit extract the lower bit and shift-right the byte )
+    DUP 2/ SWAP 1 AND ;
 
-: OCR-OFFSET ( n,p -- [p/3]*27+[p%3]+n*3  ) 
+: OCR-OFFSET ( n,m -- p  calculates position of char m of nth ocr digit ) 
     OCR-HEIGHT /MOD OCR-LINE-SIZE * + 
     SWAP OCR-WIDTH * + ;
 
 : OCR>PATTERN ( n -- byte  converts one OCR digit into its binary pattern ) 
     0  9 0 DO  
-        OVER I OCR-OFFSET OCR-BUFFER + C@ BAR? BIT! 
+        OVER I OCR-OFFSET OCR-BUFFER + C@ BAR? BIT<< 
     LOOP NIP ;
 
 : BIT>OCR-CHAR ( b,n -- c  converts bit #n into OCR char SP,| or _ )
@@ -59,7 +59,7 @@ ACCOUNT ACCOUNT-SIZE ERASE
 
 : PATTERN>OCR ( byte,n -- converts a binary pattern into the n OCR digit)
     9 0 DO
-        SWAP BIT@
+        SWAP BIT>>
         I BIT>OCR-CHAR
         ROT DUP 8 I - OCR-OFFSET OCR-BUFFER +
         ROT SWAP C! 
@@ -97,7 +97,10 @@ ACCOUNT ACCOUNT-SIZE ERASE
     LOOP   11 MOD ;
 
 : ILLEGIBLE? ( -- f|t    checks the account for illegible digit )
-    FALSE 9 0 DO ACCOUNT I + C@ NOT-FOUND = IF DROP TRUE LEAVE THEN LOOP ;
+    FALSE   9 0 DO
+        ACCOUNT I + C@ 
+        NOT-FOUND = IF DROP TRUE LEAVE THEN 
+    LOOP ;
 
 : PRINT-ACCOUNT \ prints the account with suffix if illegal or error
     ACCOUNT 9 TYPE 
