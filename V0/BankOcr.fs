@@ -1,5 +1,7 @@
 \ BankOCR.fs  Solving the Bank OCR kata
 
+: BINARY 2 BASE ! ;
+
     32 CONSTANT SP
 CHAR _ CONSTANT HBAR
 CHAR | CONSTANT VBAR
@@ -7,7 +9,12 @@ CHAR | CONSTANT VBAR
      3 CONSTANT OCR-HEIGHT
      9 CONSTANT ACCOUNT-SIZE
 CHAR ? CONSTANT NOT-FOUND
+
+: OCR-LINES OCR-WIDTH ACCOUNT-SIZE * * ;
+: OCR-COLS  OCR-WIDTH * ;
+
 OCR-WIDTH ACCOUNT-SIZE * CONSTANT OCR-LINE-SIZE
+
 
 CREATE OCR-BUFFER OCR-WIDTH OCR-HEIGHT ACCOUNT-SIZE * * ALLOT 
 
@@ -20,7 +27,7 @@ CREATE OCR-BUFFER OCR-WIDTH OCR-HEIGHT ACCOUNT-SIZE * * ALLOT
 \ a bar in the middle column is always horizontal
 \ a bar in column 0 or 2 is always vertical 
 \ therefore each char can be coded on 1 bit.
-\ the char in column 0 row 0 is always space
+\ the chars in column 0 and 2,row 0 are always space
 \ therefore each OCR digit can be coded on 8 bits 
 
 \ bits#   0   1   2   3   4   5   6   7   8   9  
@@ -48,24 +55,20 @@ ACCOUNT ACCOUNT-SIZE ERASE
 : BIT>>   ( byte -- byte',bit extract the lower bit and shift-right the byte )
     DUP 1 RSHIFT SWAP 1 AND ;
 
-: OCR-OFFSET ( n,m -- p  calculates position of char m of nth ocr digit ) 
-    OCR-HEIGHT /MOD OCR-LINE-SIZE * + 
-    SWAP OCR-WIDTH * + ;
+: OCR-ADDRESS ( n,m -- addr  address of the OCR char m of nth ocr digit )
+    OCR-HEIGHT /MOD OCR-LINES + SWAP OCR-COLS + OCR-BUFFER + ;
 
 : OCR>PATTERN ( n -- byte  converts one OCR digit into its binary pattern ) 
-    0  9 0 DO  
-        OVER I OCR-OFFSET OCR-BUFFER + C@ BAR? BIT<< 
-    LOOP NIP ;
+    0  9 0 DO OVER I OCR-ADDRESS C@ BAR? BIT<< LOOP NIP ;
 
 : BIT>OCR-CHAR ( b,n -- c  converts bit #n into OCR char SP,| or _ )
-    2 + 3 MOD IF VBAR ELSE HBAR THEN
-    SWAP 0= IF DROP SP THEN ;
+    2 + 3 MOD IF VBAR ELSE HBAR THEN SWAP 0= IF DROP SP THEN ;
 
 : PATTERN>OCR ( byte,n -- converts a binary pattern into the n OCR digit)
     9 0 DO
         SWAP BIT>>
         I BIT>OCR-CHAR
-        ROT DUP 8 I - OCR-OFFSET OCR-BUFFER +
+        ROT DUP 8 I - OCR-ADDRESS
         ROT SWAP C! 
     LOOP 2DROP ; 
 
@@ -75,7 +78,7 @@ ACCOUNT ACCOUNT-SIZE ERASE
 : CHAR>DIGIT ( n -- c  convert char [0..9] to 0..9 and ? to 15 )
     [ 2 BASE ! ] 001111 AND [ DECIMAL ] ;
 
-: PATTERN>DIGIT  ( byte -- c|?  search the digits table for a digit or ? if not found) 
+: PATTERN>DIGIT  ( b -- c|?  search the digits table for b. ? if not found) 
     NOT-FOUND   10 0 DO
         OVER I DIGIT>PATTERN = IF  DROP I DIGIT>CHAR LEAVE THEN  
     LOOP NIP ; 
@@ -109,7 +112,7 @@ ACCOUNT ACCOUNT-SIZE ERASE
     SUMCHECK-ERROR? IF ."  ERR" THEN THEN ;
 
 : PRINT-OCR \ prints the OCR 3 line text
-    3 0 DO OCR-BUFFER 0 I 3 * OCR-OFFSET + 
+    3 0 DO 0 I 3 * OCR-ADDRESS 
            OCR-LINE-SIZE TYPE CR LOOP ;
     
 
