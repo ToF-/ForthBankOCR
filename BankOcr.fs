@@ -43,10 +43,10 @@ ACCOUNT ACCOUNT-SIZE ERASE
     32 <> 1 AND ;
 
 : BIT<<   ( byte,bit -- byte'  shift-left the byte and store a new bit into the right position ) 
-    SWAP 2* OR ;
+    SWAP 1 LSHIFT OR ;
 
 : BIT>>   ( byte -- byte',bit extract the lower bit and shift-right the byte )
-    DUP 2/ SWAP 1 AND ;
+    DUP 1 RSHIFT SWAP 1 AND ;
 
 : OCR-OFFSET ( n,m -- p  calculates position of char m of nth ocr digit ) 
     OCR-HEIGHT /MOD OCR-LINE-SIZE * + 
