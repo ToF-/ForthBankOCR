@@ -1,10 +1,31 @@
 \ BankOcr
 
-CREATE OCR-BUFFER 9 3 * 3 * ALLOT
+3  CONSTANT OCR-WIDTH
+3  CONSTANT OCR-HEIGHT
+9  CONSTANT ACCOUNT-SIZE
+ACCOUNT-SIZE OCR-WIDTH * CONSTANT OCR-LINE-SIZE
+
+CREATE OCR-BUFFER 
+OCR-LINE-SIZE OCR-HEIGHT * ALLOT
 
 : BAR? 32 <> 1 AND ;
 
-: OCR-ADDRESS ( n i -- addr  char i or nth ocr digit ) 
+: OCR-OFFSET ( i -- pos of char i in ocr digit )
     ?DUP 0= IF 1 ELSE
-    1- 3 /MOD 1+ 27 * SWAP + THEN 
-    SWAP 3 * + OCR-BUFFER + ;
+    1- OCR-HEIGHT /MOD 
+    1+ OCR-LINE-SIZE * 
+    SWAP + 
+    THEN ;
+       
+: OCR-ADDRESS ( n i -- addr  char i or nth ocr digit ) 
+    OCR-OFFSET SWAP OCR-WIDTH * 
+    + OCR-BUFFER + ;
+
+: EMPTY-OCR-BUFFER ( -- )
+    OCR-BUFFER OCR-LINE-SIZE OCR-HEIGHT * 20 FILL ;
+
+: OCR>PATTERN ( n -- b )
+    DUP 0 OCR-ADDRESS C@ BAR? ( n b )
+    7 1 DO 1 LSHIFT OVER I OCR-ADDRESS C@ BAR?  OR LOOP
+    NIP ;
+    
