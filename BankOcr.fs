@@ -50,6 +50,7 @@ DECIMAL
 
 2 BASE !
 : >CHAR 110000 OR ;
+: >INT  001111 AND ;
 DECIMAL
 
 : PATTERN>DIGIT ( b -- c )
@@ -70,3 +71,8 @@ DECIMAL
     SIZE 0 DO 
         I ACCOUNT + C@ NOT-FOUND = OR 
     LOOP ;
+
+: ERROR? ( -- f|t )
+    0
+    SIZE 0 DO  ACCOUNT I + C@  >INT SIZE I - * + LOOP
+    11 MOD ;
