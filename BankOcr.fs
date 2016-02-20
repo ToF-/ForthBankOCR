@@ -96,3 +96,10 @@ VARIABLE LINE-OFFSET
             0 LINE-OFFSET !
         THEN
     REPEAT ;
+
+: MAIN 
+    NEXT-ARG 2DUP 0 0 D<> IF
+        PROCESS-FILE
+    ELSE 2DROP THEN ;
+
+    
