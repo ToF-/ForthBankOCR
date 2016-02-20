@@ -16,9 +16,6 @@ CREATE ACCOUNT SIZE ALLOT
 
 : OCR-WIDTH SIZE WIDTH * ;
 
-CREATE OCR OCR-WIDTH HEIGHT * ALLOT
-
-: EMPTY-OCR OCR OCR-WIDTH HEIGHT * ERASE ;
 
 2 BASE !
 CTABLE DIGITS  
@@ -38,7 +35,7 @@ DECIMAL
     THEN ;
        
 : ADDRESS ( n i -- addr  char i or nth ocr digit ) 
-    POS SWAP WIDTH * + OCR + ;
+    POS SWAP WIDTH * + PAD + ;
 
 : OCR-BIT ( n i -- 0|1  bar at char i of nth ocr digit )
     ADDRESS C@ BAR? ;
@@ -77,9 +74,25 @@ DECIMAL
     SIZE 0 DO  ACCOUNT I + C@  >INT SIZE I - * + LOOP
     11 MOD ;
 
-: PROCESS
+: PROCESS-OCR
     OCR>ACCOUNT 
     .ACCOUNT SPACE
     ILLEGIBLE? IF ."  ILL"
     ELSE ERROR? IF ."  ERR" THEN
     THEN CR ;
+
+
+VARIABLE LINE-OFFSET 
+
+: PROCESS-FILE ( addr,u -- )
+    R/O OPEN-FILE THROW 
+    0 LINE-OFFSET !
+    BEGIN
+        PAD LINE-OFFSET @ + OVER 100 SWAP READ-LINE THROW 
+    WHILE
+        LINE-OFFSET +!
+        LINE-OFFSET @ 81 >= IF 
+            PROCESS-OCR
+            0 LINE-OFFSET !
+        THEN
+    REPEAT ;
