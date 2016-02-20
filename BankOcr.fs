@@ -76,3 +76,10 @@ DECIMAL
     0
     SIZE 0 DO  ACCOUNT I + C@  >INT SIZE I - * + LOOP
     11 MOD ;
+
+: PROCESS
+    OCR>ACCOUNT 
+    .ACCOUNT SPACE
+    ILLEGIBLE? IF ."  ILL"
+    ELSE ERROR? IF ."  ERR" THEN
+    THEN CR ;

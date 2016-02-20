@@ -29,12 +29,26 @@ CREATE TEST
 |.|   |  _|  _| |_| |_  |_   | |_| |_|
 |_|   | |_   _|   |  _| |_|  | |_|  _|
 
-TEST      30 TYPE CR
-TEST 30 + 30 TYPE CR
-TEST 60 + 30 TYPE CR
-
 
 10 ACCOUNT-SIZE !
+
+CREATE VALID-TEST
+...  _  _   _   _   _   _   _   _ 
+|_| |_   | |_  |.| |_| |.| |.| |.| 
+  |  _|  |  _| |_| |_| |_| |_| |_|
+ 
+CREATE ERROR-TEST
+...  _  _   _  ...  _   _   _   _ 
+|_| |_   | |_    | |_| |.| |.| |.| 
+  |  _|  |  _|   | |_| |_| |_| |_|
+
+CREATE ILLEGIBLE-TEST
+...  _   _   _   _   _   _   _   _ 
+|_| |_  ... |_  |.| |_| |.| |.| |.| 
+  |  _|   |  _| |_| |_| |_| |_| |_|
+
+ 
+
 
 : AUTOTEST
     \ detecting a vertical or horizontal bar
@@ -88,6 +102,14 @@ TEST 60 + 30 TYPE CR
     S" 457508001" ACCOUNT SWAP CMOVE
     ASSERT( ERROR? )
 
+    9 ACCOUNT-SIZE !
+    CR
+    VALID-TEST OCR 81 CMOVE 
+    PROCESS 
+    ERROR-TEST OCR 81 CMOVE 
+    PROCESS 
+    ILLEGIBLE-TEST OCR 81 CMOVE
+    PROCESS
 
     ." TESTS PASSED"
     DEPTH ?DUP IF CR .S THEN 
