@@ -21,9 +21,6 @@ CHAR | CONSTANT PIPE
 : ...  BL  BL  BL    LINE ;
 
 
-: CHECK-ADDRESS ( n i p -- f|t )
-    PAD + -ROT ADDRESS = ;
-
 CREATE TEST
  _  ...  _   _  ...  _   _  _   _   _
 |.|   |  _|  _| |_| |_  |_   | |_| |_|
@@ -59,43 +56,35 @@ CREATE ILLEGIBLE-TEST
     \ position of an OCR bar (10 x 3 char digits per line) : 
     \     0123
     \    ..... 
-    \  0 . 0  
-    \ 30 .123
-    \ 60 .456
+    \  0 .012
+    \ 30 .345
+    \ 60 .678
     
-    ASSERT( 0 0  1 CHECK-ADDRESS )
-    ASSERT( 0 1 30 CHECK-ADDRESS )
-    ASSERT( 0 2 31 CHECK-ADDRESS )
-    ASSERT( 0 3 32 CHECK-ADDRESS )
-    ASSERT( 0 4 60 CHECK-ADDRESS )
-    ASSERT( 0 5 61 CHECK-ADDRESS )
-    ASSERT( 0 6 62 CHECK-ADDRESS )
-    ASSERT( 1 0  4 CHECK-ADDRESS )
-    ASSERT( 1 1 33 CHECK-ADDRESS )
-    ASSERT( 1 2 34 CHECK-ADDRESS )
-    ASSERT( 9 6 89 CHECK-ADDRESS )
+    ASSERT( 0 OCR-BIT-POS 0 = )
+    ASSERT( 1 OCR-BIT-POS 1 = )
+    ASSERT( 2 OCR-BIT-POS 2 = )
+    ASSERT( 3 OCR-BIT-POS 30 = )
+    ASSERT( 4 OCR-BIT-POS 31 = )
+    ASSERT( 5 OCR-BIT-POS 32 = )
+    ASSERT( 8 OCR-BIT-POS 62 = )
 
+    ASSERT( 0 OCR-POS 0  = )
+    ASSERT( 1 OCR-POS 3  = )
+    ASSERT( 4 OCR-POS 12 = ) 
     TEST PAD 90 CMOVE
     \ converts OCR digits into patterns
-    ASSERT( 0 [ 2 BASE ! ] OCR>PATTERN 1101111 = [ DECIMAL ] )
-    ASSERT( 1 [ 2 BASE ! ] OCR>PATTERN 0001001 = [ DECIMAL ] )
-    ASSERT( 5 [ 2 BASE ! ] OCR>PATTERN 1110011 = [ DECIMAL ] )
-    ASSERT( 9 [ 2 BASE ! ] OCR>PATTERN 1111011 = [ DECIMAL ] )
+    ASSERT( PAD WIDTH 0 * + [ 2 BASE ! ] OCR>PATTERN 10101111 = [ DECIMAL ] )
+    ASSERT( PAD WIDTH 1 * + [ 2 BASE ! ] OCR>PATTERN 00001001 = [ DECIMAL ] )
+    ASSERT( PAD WIDTH 5 * + [ 2 BASE ! ] OCR>PATTERN 10110011 = [ DECIMAL ] )
+    ASSERT( PAD WIDTH 9 * + [ 2 BASE ! ] OCR>PATTERN 10111011 = [ DECIMAL ] )
 
-    ASSERT( [ 2 BASE ! ] 1111111 [ DECIMAL ] PATTERN>DIGIT [CHAR] 8 = )
-    
-    \ converts OCR digits into account number
-    OCR>ACCOUNT .ACCOUNT SPACE
+    ASSERT( [ 2 BASE ! ] 10111111 [ DECIMAL ] PATTERN>DIGIT [CHAR] 8 = )
 
     \ a missing bar in one digit makes the account illegible
-    ASSERT( BL 0 0 ADDRESS C!  
-            OCR>ACCOUNT ACCOUNT C@ [CHAR] ? = ) 
+    ASSERT( BL PAD 1+ C! PAD OCR>ACCOUNT ACCOUNT C@ [CHAR] ? = ) 
     ASSERT( ILLEGIBLE? )
     
-    BL 1 3 ADDRESS C!
-    
-    OCR>ACCOUNT .ACCOUNT SPACE
-
+    PAD OCR>ACCOUNT .ACCOUNT SPACE
     9 ACCOUNT-SIZE !
     S" 457508000" ACCOUNT SWAP CMOVE
     ASSERT( ERROR? 0= )
@@ -105,11 +94,11 @@ CREATE ILLEGIBLE-TEST
     9 ACCOUNT-SIZE !
     CR
     VALID-TEST PAD 81 CMOVE 
-    PROCESS-OCR 
+    PAD PROCESS-OCR 
     ERROR-TEST PAD 81 CMOVE 
-    PROCESS-OCR 
+    PAD PROCESS-OCR 
     ILLEGIBLE-TEST PAD 81 CMOVE
-    PROCESS-OCR
+    PAD PROCESS-OCR
 
     S" sample.txt" PROCESS-FILE
 
