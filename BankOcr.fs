@@ -1,12 +1,11 @@
-: BYTE-POS ( addr,n -- addr ) 3 / + ;
-: BAR?     ( addr -- t|f )    C@ 32 <> 1 AND ;
-: BIT!     ( addr b -- )      OVER C@ 1 LSHIFT OR SWAP C! ;
+: BAR?   32 <> 1 AND ;
+: BIT<<  SWAP 1 LSHIFT OR ;  
 
-: OCR>BITS ( src dst -- )
-    SWAP 0 DO 
-        2DUP I BYTE-POS  ( src,dst,src,di)
-        SWAP I + BAR?    ( src,dst,di,b )
-        BIT!  
+: OCR>BITS ( src u dst -- )
+    SWAP 0 DO 2DUP        
+        I 3 / + DUP C@     
+        ROT I + C@ BAR? 
+        BIT<< SWAP C! 
     LOOP 2DROP ;
 
 
