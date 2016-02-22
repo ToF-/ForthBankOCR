@@ -38,6 +38,37 @@ S" |_|  ||_  _|  | _||_|  ||_| _|" PAD OCR>BITs
     PAD 8 7 ADD-OCR-BIT
     PAD ACCOUNT 10 >DIGITS
     ASSERT( S" 0123456789" ACCOUNT 10 COMPARE 0= )
+
+\ note on missing bits: on an account that doesn't checksums or is illegible, 
+\ there can be only one missing bit. So we try every possibly missing bit on
+\ each byte, keeping track of possible missing bits. There can be only 9 
+\ alternatives because if a missing bit added makes a corrcect account number,
+\ then another missing bit on the same bit can't. Changing a digits changes the 
+\ checksum. Algorithm is thus:
+\ if account is ILL or ERR
+\   erase array Alt
+\   for D from 0 to 8
+\       for B from 0 to 8 
+\           if byte[D] or 2^b <> byte[D] 
+\               saved = byte[D]
+\               byte[D] |= 2^b
+\               
+\               if account` is OK
+\                   alt[D] = 2^b
+\               endif
+\               byte[D] = saved
+\           endif
+\       endfor
+\   endfor
+\   for D from 0 to 8
+\       if alt[D] <> 0 
+\           saved = byte[D]
+\           byte[D] |= 2^b
+\           convert to account 
+\           print it
+\       endif
+\   endfor
+\               
     
 
 
