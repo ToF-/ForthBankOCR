@@ -30,10 +30,13 @@ DECIMAL
         OVER I + C!
     LOOP 2DROP ;
 
+: NOT-FOUNDS ( src,n -- n  number of digits not found )
+    0 SWAP 0 DO 
+        OVER I + C@ NOT-FOUND = IF 1+ THEN 
+    LOOP NIP ;
+ 
 : LEGIBLE ( src,n -- f|t true is the string doesn't contain ? )
-    FALSE SWAP 0 DO 
-        OVER I + C@ NOT-FOUND = OR 
-    LOOP 0= NIP ;
+    NOT-FOUNDS 0= ;
 
 : CHECKSUM ( src,n -- f|t true if the account checksums )
     0 SWAP 0 DO
