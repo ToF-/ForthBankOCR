@@ -1,25 +1,35 @@
 \ BankOcr
 
-: BAR? ( c -- 0|1 )
-    BL <> 1 AND  ;
+: BAR?  ( c -- 0|1 )
+    BL <> 1 AND ;    
 
-: #BAR? ( adr,i -- 0|1 )
+: #BAR? ( addr,i -- 0|1 )
     + C@ BAR? ;
 
-: <<BIT! ( b,adr -- )
-    DUP C@ 
-    1 LSHIFT ROT OR 
-    SWAP C! ;
+: <<BIT ( b,byte -- byte' )
+    1 LSHIFT OR ;
 
-: BYTE# ( n -- n/3 )
-    3 / ;
+: <<BIT! ( b,addr -- )
+    SWAP OVER C@ <<BIT SWAP C! ;
 
-: OCR-BIT! ( n,b,adr -- )
-    ROT BYTE# + <<BIT! ;
+: OCR>BYTE! ( srce,dest -- )
+    3 0 DO
+        OVER I #BAR? ( srce,dest,b -- )
+        OVER <<BIT! 
+    LOOP 2DROP ;
 
-: OCR-BITS! ( src,max,dst -- )
-    SWAP 0 DO 
-        OVER I #BAR? 
-        OVER I -ROT OCR-BIT! 
-    LOOP  2DROP ;
-    
+: SIZE 3 / ;
+: OCR# 3 *  + ;
+
+: OCR>BYTES! ( srce,n,dest -- )
+    SWAP SIZE 0 DO
+        OVER I OCR#  
+        OVER I + OCR>BYTE!
+    LOOP 2DROP ;
+
+CREATE OCRBYTES 10 ALLOT
+OCRBYTES 10 ERASE
+S"  _     _  _     _  _  _  _  _ " OCRBYTES OCR>BYTES!
+S" | |  | _| _||_||_ |_   ||_||_|" OCRBYTES OCR>BYTES!
+S" |_|  ||_  _|  | _||_|  ||_| _|" OCRBYTES OCR>BYTES!
+        
