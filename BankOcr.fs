@@ -33,11 +33,15 @@ CHAR ? CONSTANT NOT-FOUND
     LOOP NIP ;
 
 CREATE ACCOUNT 9 ALLOT
-: TO-INT ( c -- n )
+
+: TO-CHAR ( c -- n )
     48 OR ;
 
+: TO-INT ( c -- n )
+    15 AND ;
+
 : FIND-DIGITS ( addr,n -- )
-    0 DO DUP DUP C@ FIND-DIGIT TO-INT SWAP C! 1+ LOOP DROP ;
+    0 DO DUP DUP C@ FIND-DIGIT TO-CHAR SWAP C! 1+ LOOP DROP ;
 
 : PROCESS-LINE ( str,n -- )
     ?DUP IF ACCOUNT -ROT ENCODE-LINE 
@@ -45,3 +49,13 @@ CREATE ACCOUNT 9 ALLOT
         DROP ACCOUNT 9 2DUP
         FIND-DIGITS TYPE CR
     THEN ;
+
+: ILLEGIBLE? ( str,n -- t|f )
+    FALSE -ROT 0 DO
+        DUP C@ NOT-FOUND = ROT OR SWAP 1+
+    LOOP DROP ; 
+
+: CHECKSUM? ( str,n -- t|f )
+    0 -ROT 0 DO    
+        DUP C@ TO-INT 9 I - * ROT + SWAP 1+ 
+    LOOP DROP 11 MOD 0= ;
