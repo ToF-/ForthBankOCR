@@ -43,13 +43,6 @@ CREATE ACCOUNT 9 ALLOT
 : FIND-DIGITS ( addr,n -- )
     0 DO DUP DUP C@ FIND-DIGIT TO-CHAR SWAP C! 1+ LOOP DROP ;
 
-: PROCESS-LINE ( str,n -- )
-    ?DUP IF ACCOUNT -ROT ENCODE-LINE 
-    ELSE 
-        DROP ACCOUNT 9 2DUP
-        FIND-DIGITS TYPE CR
-    THEN ;
-
 : ILLEGIBLE? ( str,n -- t|f )
     FALSE -ROT 0 DO
         DUP C@ NOT-FOUND = ROT OR SWAP 1+
@@ -59,3 +52,25 @@ CREATE ACCOUNT 9 ALLOT
     0 -ROT 0 DO    
         DUP C@ TO-INT 9 I - * ROT + SWAP 1+ 
     LOOP DROP 11 MOD 0= ;
+
+: .ACCOUNT ( str,n )
+    2DUP TYPE
+    2DUP ILLEGIBLE? IF ."  ILL" 2DROP 
+    ELSE CHECKSUM? 0= IF ."  ERR" 
+    THEN THEN CR ;
+
+: PROCESS-LINE ( str,n -- )
+    ?DUP IF ACCOUNT -ROT ENCODE-LINE 
+    ELSE 
+        DROP ACCOUNT 9 2DUP
+        FIND-DIGITS .ACCOUNT
+    THEN ;
+
+: PROCESS-FILE ( str,n -- )
+    R/O OPEN-FILE THROW >R PAD 30 ERASE
+    BEGIN
+        PAD 40 R@ READ-LINE THROW
+    WHILE
+        PAD SWAP  PROCESS-LINE
+    REPEAT R> DROP ;
+    
