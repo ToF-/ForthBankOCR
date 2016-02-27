@@ -14,6 +14,14 @@ S" BankOcr.fs" REQUIRED
 CHAR | CONSTANT PIPE
 CHAR _ CONSTANT UNDERSCORE
 
+: TEST-ENCODE 
+    >R >R >R >R 
+    PAD ENCODE
+    R> R> 
+    PAD ENCODE
+    R> R> 
+    PAD ENCODE ;
+
 : TESTS
     ASSERT( BL BAR? 0 = )
     ASSERT( PIPE BAR? 1 = )
@@ -39,21 +47,47 @@ CHAR _ CONSTANT UNDERSCORE
             1 PAD <<BIT!
             1 PAD <<BIT!
             PAD C@ 1011 = ) 
-    ASSERT( S"  _ " DROP PAD OCR>BYTE!
-            S" | |" DROP PAD OCR>BYTE!
-            S" |_|" DROP PAD OCR>BYTE!
+    ASSERT( S"  _ " DROP PAD <<BITS
+            S" | |" DROP PAD <<BITS
+            S" |_|" DROP PAD <<BITS
             PAD C@ 10101111 = ) 
-    ASSERT( S"  _    " PAD OCR>BYTES!
-            S" | |  |" PAD OCR>BYTES!
-            S" |_|  |" PAD OCR>BYTES!
+    ASSERT( S"  _    " PAD ENCODE
+            S" | |  |" PAD ENCODE
+            S" |_|  |" PAD ENCODE
             PAD 1+ C@ 00001001 = ) 
+    ASSERT( 01010101 FIND-DIGIT NOT-FOUND = )
+    ASSERT( 10101111 FIND-DIGIT 0 = )
+    ASSERT( 10111111 FIND-DIGIT 1000 = )
+
     [ DECIMAL ] 
-    OCRBYTES 10 DUMP
+    PAD 9 ERASE
+    S"     _  _     _  _  _  _  _ " 
+    S"   | _| _||_||_ |_   ||_||_|" 
+    S"   ||_  _|  | _||_|  ||_| _|" 
+    TEST-ENCODE
+    PAD PAD 9 + OCR>ACCOUNT
+    PAD 9 + 9 TYPE CR
+    ASSERT( PAD 9 + C@ [CHAR] 1 = )
 
+    PAD 9 ERASE
+    S"     _  _     _  _  _  _  _ " 
+    S"   | _| _||_||_ |_   ||_||_|"
+    S"    |_  _|  | _||_|  ||_| _|"
+    TEST-ENCODE
+    PAD PAD 9 + OCR>ACCOUNT
+    PAD 9 + 9 TYPE CR
+    ASSERT( PAD 9 + C@ [CHAR] ? = )
 
-    
+    ASSERT( S" 457508000" DROP CHECKSUM )
+    ASSERT( S" 457508001" DROP CHECKSUM 0= )
+    ASSERT( S" 45750?001" DROP ILLEGIBLE )
+    ASSERT( S" 457504001" DROP ILLEGIBLE 0= )
 
+    S" 457508000" DROP .ACCOUNT CR
+    S" 111111111" DROP .ACCOUNT CR
+    S" ?34433333" DROP .ACCOUNT CR
 
+    S" input.txt" PROCESS-FILE
 
 ;
 
