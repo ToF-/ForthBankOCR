@@ -12,15 +12,15 @@ S" BankOcr.fs" REQUIRED
 \ |_|  ||_  _|  | _||_|  ||_| _|
 
 
-: TEST_ENCODING_OCR 
-    ASSERT( 0 S"  _ " ENCODE
-              S" | |" ENCODE
-              S" |_|" ENCODE
+: TEST-ENCODING-OCR 
+    ASSERT( 0 S"  _ " ENCODE-OCR
+              S" | |" ENCODE-OCR
+              S" |_|" ENCODE-OCR
             [ 2 BASE ! ]
             10101111 =?
             [ DECIMAL ] ) ;
                 
-: TEST_ENCODING_OCR_LINE 
+: TEST-ENCODING-OCR-LINE 
     PAD 2 ERASE
     PAD S"  _    " ENCODE-LINE
     PAD S" | |  |" ENCODE-LINE
@@ -30,9 +30,16 @@ S" BankOcr.fs" REQUIRED
     ASSERT( PAD 1 + C@  00001001 =? )
     [ DECIMAL ] ;
 
+: TEST-FIND-DIGIT   
+    [ 2 BASE ! ]
+    ASSERT( 10101111 FIND-DIGIT 0000 =? )
+    ASSERT( 10111111 FIND-DIGIT 1000 =? )
+    [ DECIMAL ] ;
+
 : TESTS 
-    TEST_ENCODING_OCR
-    TEST_ENCODING_OCR_LINE
+    TEST-ENCODING-OCR
+    TEST-ENCODING-OCR-LINE
+    TEST-FIND-DIGIT
 ;
 PAGE
 TESTS
