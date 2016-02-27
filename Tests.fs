@@ -36,10 +36,19 @@ S" BankOcr.fs" REQUIRED
     ASSERT( 10111111 FIND-DIGIT 1000 =? )
     [ DECIMAL ] ;
 
+: TEST-PROCESS-LINE
+    ACCOUNT 9 ERASE
+    S"     _  _     _  _  _  _  _ " PROCESS-LINE
+    S"   | _| _||_||_ |_   ||_||_|" PROCESS-LINE
+    S"   ||_  _|  | _||_|  ||_| _|" PROCESS-LINE
+    S" " PROCESS-LINE 
+    ASSERT( ACCOUNT 9 S" 123456789" COMPARE 0 =? ) ;
+
 : TESTS 
     TEST-ENCODING-OCR
     TEST-ENCODING-OCR-LINE
     TEST-FIND-DIGIT
+    TEST-PROCESS-LINE
 ;
 PAGE
 TESTS
