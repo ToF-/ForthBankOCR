@@ -58,6 +58,9 @@ CREATE ACCOUNT 9 ALLOT
         DUP C@ TO-INT 9 I - * ROT + SWAP 1+ 
     LOOP DROP 11 MOD 0= ;
 
+: ADD-MISSING-BIT ( byte,n -- byte' )
+    1 SWAP LSHIFT OR ;
+
 : .ACCOUNT ( str,n )
     2DUP TYPE
     2DUP ILLEGIBLE? IF ."  ILL" 2DROP 
