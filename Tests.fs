@@ -64,7 +64,8 @@ S" BankOcr.fs" REQUIRED
     S" | || || || || || || ||_   |" PROCESS-LINE
     S" |_ |_||_||_||_||_||_| _|  |" PROCESS-LINE
     S" " PROCESS-LINE
-    ASSERT( S" 000000051" ALT-ACCOUNT 9 COMPARE 0 =? )
+    ASSERT( ALT-ACCOUNTS-MAX @ 1 =? )
+    ASSERT( S" 000000051" ALT-ACCOUNTS 9 COMPARE 0 =? )
 ;
 
 
