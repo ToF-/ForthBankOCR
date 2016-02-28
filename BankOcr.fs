@@ -32,6 +32,7 @@ CHAR ? CONSTANT NOT-FOUND
         OVER PATTERNS I + C@ = IF DROP I LEAVE THEN
     LOOP NIP ;
 
+CREATE OCR-BITS 9 ALLOT
 CREATE ACCOUNT 9 ALLOT
 
 : TO-CHAR ( c -- n )
@@ -40,8 +41,12 @@ CREATE ACCOUNT 9 ALLOT
 : TO-INT ( c -- n )
     15 AND ;
 
-: FIND-DIGITS ( addr,n -- )
-    0 DO DUP DUP C@ FIND-DIGIT TO-CHAR SWAP C! 1+ LOOP DROP ;
+: FIND-DIGITS ( srce,dest,n -- )
+    0 DO
+        >R DUP C@ FIND-DIGIT TO-CHAR ( srce,c -- )
+        R@ C! 
+        1+ R> 1+ 
+    LOOP 2DROP ;
 
 : ILLEGIBLE? ( str,n -- t|f )
     FALSE -ROT 0 DO
@@ -60,10 +65,10 @@ CREATE ACCOUNT 9 ALLOT
     THEN THEN CR ;
 
 : PROCESS-LINE ( str,n -- )
-    ?DUP IF ACCOUNT -ROT ENCODE-LINE 
-    ELSE 
-        DROP ACCOUNT 9 2DUP
-        FIND-DIGITS .ACCOUNT
+    ?DUP IF OCR-BITS -ROT ENCODE-LINE 
+    ELSE DROP 
+        OCR-BITS ACCOUNT 9 FIND-DIGITS
+        ACCOUNT 9 .ACCOUNT
     THEN ;
 
 : PROCESS-FILE ( str,n -- )
