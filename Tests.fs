@@ -59,10 +59,23 @@ S" BankOcr.fs" REQUIRED
     ASSERT( 111 00110010 ADD-MISSING-BIT 10110010 =? )
     [ DECIMAL ] ;
 
+: TEST-ADD-ALTERNATIVE 
+    0 ALT-ACCOUNTS-MAX !
+    S" 000000051" ADD-ALTERNATIVE
+    ASSERT( ALT-ACCOUNTS-MAX @ 1 =? )
+    S" 0000000?3" ADD-ALTERNATIVE ( not added, illegible )
+    ASSERT( ALT-ACCOUNTS-MAX @ 1 =? ) 
+    S" 000000052" ADD-ALTERNATIVE ( not added, doesn't checksum)
+    ASSERT( ALT-ACCOUNTS-MAX @ 1 =? ) ;
+
+: TEST-VALID
+    ASSERT( S" 0000000?3" VALID? 0 =? ) 
+    ASSERT( S" 000000033" VALID? 0 =? ) ;
+
 : TEST-FIND-ALTERNATIVE 
-    S"  _  _  _  _  _  _  _  _    " PROCESS-LINE
+    S"     _  _  _  _  _  _  _    " PROCESS-LINE
     S" | || || || || || || ||_   |" PROCESS-LINE
-    S" |_ |_||_||_||_||_||_| _|  |" PROCESS-LINE
+    S" |_||_||_||_||_||_||_| _|  |" PROCESS-LINE
     S" " PROCESS-LINE
     ASSERT( ALT-ACCOUNTS-MAX @ 1 =? )
     ASSERT( S" 000000051" ALT-ACCOUNTS 9 COMPARE 0 =? )
@@ -82,6 +95,8 @@ S" BankOcr.fs" REQUIRED
     TEST-ILLEGIBLE
     TEST-CHECKSUM
     TEST-ADD-MISSING-BIT
+    TEST-ADD-ALTERNATIVE
+    TEST-VALID
     TEST-FIND-ALTERNATIVE
     \ VISUAL-TESTS 
 ;
