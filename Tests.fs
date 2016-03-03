@@ -79,8 +79,21 @@ S" BankOcr.fs" REQUIRED
     S" " PROCESS-LINE
     ASSERT( ALT-ACCOUNTS-MAX @ 1 =? )
     ASSERT( S" 000000051" ALT-ACCOUNTS 9 COMPARE 0 =? )
+    S"  _     _  _  _  _  _  _    " PROCESS-LINE
+    S" | || || || || || || ||_   |" PROCESS-LINE
+    S" |_||_||_||_||_||_||_| _|  |" PROCESS-LINE
+    S" " PROCESS-LINE
+    ASSERT( ALT-ACCOUNTS-MAX @ 1 =? )
+    ASSERT( S" 000000051" ALT-ACCOUNTS 9 COMPARE 0 =? )
 ;
 
+: TEST-SEVERAL-ALTERNATIVES 
+    S"     _  _  _  _  _  _     _ " PROCESS-LINE
+    S" |_||_|| || ||_   |  |  ||_ " PROCESS-LINE
+    S"   | _||_||_||_|  |  |  | _|" PROCESS-LINE
+    S" " PROCESS-LINE
+    ASSERT( ALT-ACCOUNTS-MAX @ 2 =? )
+;
 
 : VISUAL-TESTS
     S" 0100?0000" .ACCOUNT
@@ -98,9 +111,11 @@ S" BankOcr.fs" REQUIRED
     TEST-ADD-ALTERNATIVE
     TEST-VALID
     TEST-FIND-ALTERNATIVE
-    \ VISUAL-TESTS 
+    TEST-SEVERAL-ALTERNATIVES
+    VISUAL-TESTS 
 ;
 PAGE
 TESTS
 ." SUCCESS"
+.S
 BYE
