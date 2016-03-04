@@ -52,21 +52,21 @@ S" BankOcr.fs" REQUIRED
     ASSERT( S" 000000051" CHECKSUM? TRUE  =? ) 
     ASSERT( S" 000000061" CHECKSUM? FALSE =? ) ;
 
-: TEST-ADD-MISSING-BIT
+: TEST-SET-BIT
     [ 2 BASE ! ]
-    ASSERT( 00  00110010 ADD-MISSING-BIT 00110011 =? ) 
-    ASSERT( 10  00110010 ADD-MISSING-BIT 00110110 =? ) 
-    ASSERT( 111 00110010 ADD-MISSING-BIT 10110010 =? )
+    ASSERT( 00  00110010 SET-BIT 00110011 =? ) 
+    ASSERT( 10  00110010 SET-BIT 00110110 =? ) 
+    ASSERT( 111 00110010 SET-BIT 10110010 =? )
     [ DECIMAL ] ;
 
 : TEST-ADD-ALTERNATIVE 
-    0 ALT-MAX !
+    0 ACCOUNT# !
     S" 000000051" ADD-ALTERNATIVE
-    ASSERT( ALT-MAX @ 1 =? )
+    ASSERT( ACCOUNT# @ 1 =? )
     S" 0000000?3" ADD-ALTERNATIVE ( not added, illegible )
-    ASSERT( ALT-MAX @ 1 =? ) 
+    ASSERT( ACCOUNT# @ 1 =? ) 
     S" 000000052" ADD-ALTERNATIVE ( not added, doesn't checksum)
-    ASSERT( ALT-MAX @ 1 =? ) ;
+    ASSERT( ACCOUNT# @ 1 =? ) ;
 
 : TEST-VALID
     ASSERT( S" 0000000?3" VALID? 0 =? ) 
@@ -77,13 +77,13 @@ S" BankOcr.fs" REQUIRED
     S" | || || || || || || ||_   |" PROCESS-LINE
     S" |_||_||_||_||_||_||_| _|  |" PROCESS-LINE
     S" " PROCESS-LINE
-    ASSERT( ALT-MAX @ 1 =? )
+    ASSERT( ACCOUNT# @ 1 =? )
     ASSERT( S" 000000051" ACCOUNTS 9 COMPARE 0 =? )
     S"  _     _  _  _  _  _  _    " PROCESS-LINE
     S" | || || || || || || ||_   |" PROCESS-LINE
     S" |_||_||_||_||_||_||_| _|  |" PROCESS-LINE
     S" " PROCESS-LINE
-    ASSERT( ALT-MAX @ 1 =? )
+    ASSERT( ACCOUNT# @ 1 =? )
     ASSERT( S" 000000051" ACCOUNTS 9 COMPARE 0 =? )
 ;
 
@@ -92,7 +92,7 @@ S" BankOcr.fs" REQUIRED
     S" |_||_|| || ||_   |  |  ||_ " PROCESS-LINE
     S"   | _||_||_||_|  |  |  | _|" PROCESS-LINE
     S" " PROCESS-LINE
-    ASSERT( ALT-MAX @ 2 =? )
+    ASSERT( ACCOUNT# @ 2 =? )
     ACCOUNT 9 .ACCOUNT
     
 ;
@@ -109,7 +109,7 @@ S" BankOcr.fs" REQUIRED
     TEST-PROCESS-LINE
     TEST-ILLEGIBLE
     TEST-CHECKSUM
-    TEST-ADD-MISSING-BIT
+    TEST-SET-BIT
     TEST-ADD-ALTERNATIVE
     TEST-VALID
     TEST-FIND-ALTERNATIVE
