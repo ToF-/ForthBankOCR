@@ -30,10 +30,10 @@ S" BankOcr.fs" REQUIRED
     ASSERT( PAD 1 + C@  00001001 =? )
     [ DECIMAL ] ;
 
-: TEST-FIND-DIGIT   
+: TEST-BYTE>DIGIT   
     [ 2 BASE ! ]
-    ASSERT( 10101111 FIND-DIGIT 0000 =? )
-    ASSERT( 10111111 FIND-DIGIT 1000 =? )
+    ASSERT( 10101111 BYTE>DIGIT 0000 =? )
+    ASSERT( 10111111 BYTE>DIGIT 1000 =? )
     [ DECIMAL ] ;
 
 : TEST-PROCESS-LINE
@@ -60,13 +60,13 @@ S" BankOcr.fs" REQUIRED
     [ DECIMAL ] ;
 
 : TEST-ADD-ALTERNATIVE 
-    0 ALT-ACCOUNTS-MAX !
+    0 ALT-MAX !
     S" 000000051" ADD-ALTERNATIVE
-    ASSERT( ALT-ACCOUNTS-MAX @ 1 =? )
+    ASSERT( ALT-MAX @ 1 =? )
     S" 0000000?3" ADD-ALTERNATIVE ( not added, illegible )
-    ASSERT( ALT-ACCOUNTS-MAX @ 1 =? ) 
+    ASSERT( ALT-MAX @ 1 =? ) 
     S" 000000052" ADD-ALTERNATIVE ( not added, doesn't checksum)
-    ASSERT( ALT-ACCOUNTS-MAX @ 1 =? ) ;
+    ASSERT( ALT-MAX @ 1 =? ) ;
 
 : TEST-VALID
     ASSERT( S" 0000000?3" VALID? 0 =? ) 
@@ -77,14 +77,14 @@ S" BankOcr.fs" REQUIRED
     S" | || || || || || || ||_   |" PROCESS-LINE
     S" |_||_||_||_||_||_||_| _|  |" PROCESS-LINE
     S" " PROCESS-LINE
-    ASSERT( ALT-ACCOUNTS-MAX @ 1 =? )
-    ASSERT( S" 000000051" ALT-ACCOUNTS 9 COMPARE 0 =? )
+    ASSERT( ALT-MAX @ 1 =? )
+    ASSERT( S" 000000051" ACCOUNTS 9 COMPARE 0 =? )
     S"  _     _  _  _  _  _  _    " PROCESS-LINE
     S" | || || || || || || ||_   |" PROCESS-LINE
     S" |_||_||_||_||_||_||_| _|  |" PROCESS-LINE
     S" " PROCESS-LINE
-    ASSERT( ALT-ACCOUNTS-MAX @ 1 =? )
-    ASSERT( S" 000000051" ALT-ACCOUNTS 9 COMPARE 0 =? )
+    ASSERT( ALT-MAX @ 1 =? )
+    ASSERT( S" 000000051" ACCOUNTS 9 COMPARE 0 =? )
 ;
 
 : TEST-SEVERAL-ALTERNATIVES 
@@ -92,7 +92,9 @@ S" BankOcr.fs" REQUIRED
     S" |_||_|| || ||_   |  |  ||_ " PROCESS-LINE
     S"   | _||_||_||_|  |  |  | _|" PROCESS-LINE
     S" " PROCESS-LINE
-    ASSERT( ALT-ACCOUNTS-MAX @ 2 =? )
+    ASSERT( ALT-MAX @ 2 =? )
+    ACCOUNT 9 .ACCOUNT
+    
 ;
 
 : VISUAL-TESTS
@@ -103,7 +105,7 @@ S" BankOcr.fs" REQUIRED
 : TESTS 
     TEST-ENCODING-OCR
     TEST-ENCODING-OCR-LINE
-    TEST-FIND-DIGIT
+    TEST-BYTE>DIGIT
     TEST-PROCESS-LINE
     TEST-ILLEGIBLE
     TEST-CHECKSUM
@@ -112,7 +114,7 @@ S" BankOcr.fs" REQUIRED
     TEST-VALID
     TEST-FIND-ALTERNATIVE
     TEST-SEVERAL-ALTERNATIVES
-    VISUAL-TESTS 
+\    VISUAL-TESTS 
 ;
 PAGE
 TESTS
