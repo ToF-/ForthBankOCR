@@ -44,15 +44,15 @@ VARIABLE ALT-MAX ALT-MAX OFF
     ACCOUNTS ALT-MAX @ SIZE * + ;
 
 
-: TO-CHAR ( c -- n )
+: >CHAR ( c -- n )
     48 OR ;
 
-: TO-INT ( c -- n )
+: >INT ( c -- n )
     15 AND ;
 
 : BITS>ACCOUNT ( srce,dest,n -- )
     0 DO
-        >R DUP C@ BYTE>DIGIT TO-CHAR ( srce,c -- )
+        >R DUP C@ BYTE>DIGIT >CHAR ( srce,c -- )
         R@ C! 
         1+ R> 1+ 
     LOOP 2DROP ;
@@ -64,7 +64,7 @@ VARIABLE ALT-MAX ALT-MAX OFF
 
 : CHECKSUM? ( str,n -- t|f )
     0 -ROT 0 DO    
-        DUP C@ TO-INT SIZE I - * ROT + SWAP 1+ 
+        DUP C@ >INT SIZE I - * ROT + SWAP 1+ 
     LOOP DROP 11 MOD 0= ;
 
 : ADD-MISSING-BIT ( n,byte -- byte' )
@@ -82,14 +82,13 @@ VARIABLE ALT-MAX ALT-MAX OFF
 : DUPLICATE-BITS ( -- )
     BITS BITS' SIZE CMOVE ;
 
-: CHANGE-MISSING-BIT ( addr,n -- )
+: SET-BIT ( addr,n -- )
     OVER C@ ADD-MISSING-BIT SWAP C! ;
 
 : VALID? ( addr,n -- f|t )
     2DUP ILLEGIBLE? 0= -ROT CHECKSUM? AND ;
 
 : ADD-ALT-ACCOUNT ( addr,n -- )
-    ALT-MAX ?
     ALT-ACCOUNT SWAP CMOVE 1 ALT-MAX +! ;
 
 : ADD-ALTERNATIVE ( addr,n -- )
@@ -97,13 +96,16 @@ VARIABLE ALT-MAX ALT-MAX OFF
 
 CREATE TMP-ACCOUNT SIZE ALLOT
 
-: BIT-PATTERN-CHANGED? ( -- f|t )
-    BITS' SIZE BITS SIZE COMPARE ;
+: COMPARES ( addr,addr' -- f|t )
+    SIZE SWAP OVER COMPARE ;
+
+: BITS-CHANGED? ( -- f|t )
+    BITS' BITS COMPARES ;
 
 : FIND-MISSING-IN-OCR ( addr -- ) 
     8 0 DO 
         DUPLICATE-BITS
-        DUP I CHANGE-MISSING-BIT BIT-PATTERN-CHANGED? IF
+        DUP I SET-BIT BITS-CHANGED? IF
             BITS' TMP-ACCOUNT SIZE BITS>ACCOUNT
             TMP-ACCOUNT SIZE ADD-ALTERNATIVE  
         THEN
