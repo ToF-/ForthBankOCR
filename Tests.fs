@@ -37,12 +37,11 @@ S" BankOcr.fs" REQUIRED
     [ DECIMAL ] ;
 
 : TEST-PROCESS-LINE
-    ACCOUNT 9 ERASE
-    S"     _  _     _  _  _  _  _ " PROCESS-LINE
+    S"     _  _     _  _  _  _  _ " PROCESS-LINE 
     S"   | _| _||_||_ |_   ||_||_|" PROCESS-LINE
     S"   ||_  _|  | _||_|  ||_| _|" PROCESS-LINE
     S" " PROCESS-LINE 
-    ASSERT( ACCOUNT 9 S" 123456789" COMPARE 0 =? ) ;
+    ASSERT( ACCOUNTS 9 S" 123456789" COMPARE 0 =? ) ;
 
 : TEST-ILLEGIBLE 
     ASSERT( S" 123456?89" ILLEGIBLE? TRUE  =? ) 
@@ -97,10 +96,10 @@ S" BankOcr.fs" REQUIRED
     
 ;
 
-: VISUAL-TESTS
-    S" 0100?0000" .ACCOUNT
-    S" 010040500" .ACCOUNT
-    S" input.txt" PROCESS-FILE ;
+: VISUAL-TESTS 
+     S" 0100?0000" .ACCOUNT
+     S" 010040500" .ACCOUNT 
+     S" sample.txt" PROCESS-FILE ;
 
 : TESTS 
     TEST-ENCODING-OCR
@@ -114,7 +113,7 @@ S" BankOcr.fs" REQUIRED
     TEST-VALID
     TEST-FIND-ALTERNATIVE
     TEST-SEVERAL-ALTERNATIVES
-\    VISUAL-TESTS 
+    VISUAL-TESTS 
 ;
 PAGE
 TESTS
