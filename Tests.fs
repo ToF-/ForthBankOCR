@@ -58,14 +58,6 @@ S" BankOcr.fs" REQUIRED
     ASSERT( 111 00110010 SET-BIT 10110010 =? )
     [ DECIMAL ] ;
 
-: TEST-ADD-ALTERNATIVE 
-    0 ACCOUNT# !
-    S" 000000051" ADD-ALTERNATIVE
-    ASSERT( ACCOUNT# @ 1 =? )
-    S" 0000000?3" ADD-ALTERNATIVE ( not added, illegible )
-    ASSERT( ACCOUNT# @ 1 =? ) 
-    S" 000000052" ADD-ALTERNATIVE ( not added, doesn't checksum)
-    ASSERT( ACCOUNT# @ 1 =? ) ;
 
 : TEST-VALID
     ASSERT( S" 0000000?3" VALID? 0 =? ) 
@@ -93,26 +85,43 @@ S" BankOcr.fs" REQUIRED
     S" " PROCESS-LINE
     ASSERT( ACCOUNT# @ 2 =? )
     ACCOUNT 9 .ACCOUNT
-    
 ;
+: TEST-SEVERAL-ACCOUNTS
+S"  _     _  _  _  _  _  _  _ " PROCESS-LINE
+S"  _||_||_ |_||_| _||_||_ |_ " PROCESS-LINE
+S"  _|  | _||_||_||_ |_||_| _|" PROCESS-LINE
+S" " PROCESS-LINE
+S"     _     _  _  _  _  _  _ " PROCESS-LINE
+S"   ||_|  ||_  _||_| _||_ | |" PROCESS-LINE
+S"   | _|  | _| _| _||_ |_||_|" PROCESS-LINE
+S" " PROCESS-LINE
+S"  _     _  _  _  _     _  _ " PROCESS-LINE
+S" |_ |_|  ||_||_  _|  |  ||_|" PROCESS-LINE
+S" |_|  |  | _||_||_   |  | _|" PROCESS-LINE
+S" " PROCESS-LINE
+S"  _  _  _  _     _  _  _  _ " PROCESS-LINE
+S"  _||_||_  _|  | _||_||_| _|" PROCESS-LINE
+S" |_ |_| _||_   ||_  _||_||_ " PROCESS-LINE
+S" " PROCESS-LINE
+;
+    
 
 : VISUAL-TESTS 
-     S" 0100?0000" .ACCOUNT
-     S" 010040500" .ACCOUNT 
-     S" sample.txt" PROCESS-FILE ;
+     S" input.txt" PROCESS-FILE ;
 
 : TESTS 
-    TEST-ENCODING-OCR
-    TEST-ENCODING-OCR-LINE
-    TEST-BYTE>DIGIT
-    TEST-PROCESS-LINE
-    TEST-ILLEGIBLE
-    TEST-CHECKSUM
-    TEST-SET-BIT
-    TEST-ADD-ALTERNATIVE
-    TEST-VALID
-    TEST-FIND-ALTERNATIVE
-    TEST-SEVERAL-ALTERNATIVES
+\    TEST-ENCODING-OCR
+\    TEST-ENCODING-OCR-LINE
+\    TEST-BYTE>DIGIT
+\    TEST-PROCESS-LINE
+\    TEST-ILLEGIBLE
+\    TEST-CHECKSUM
+\    TEST-SET-BIT
+\    TEST-ADD-ALTERNATIVE
+\    TEST-VALID
+\    TEST-FIND-ALTERNATIVE
+\    TEST-SEVERAL-ALTERNATIVES
+\    TEST-SEVERAL-ACCOUNTS
     VISUAL-TESTS 
 ;
 PAGE
